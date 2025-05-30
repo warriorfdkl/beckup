@@ -1,6 +1,7 @@
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useEffect } from 'react'
+import { UserProvider } from '@/context/UserContext'
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -19,5 +20,9 @@ export default function App({ Component, pageProps }: AppProps) {
     initWebApp()
   }, [])
 
-  return <Component {...pageProps} />
+  return (
+    <UserProvider>
+      <Component {...pageProps} />
+    </UserProvider>
+  )
 } 

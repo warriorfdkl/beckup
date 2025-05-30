@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { useUser } from '@/context/UserContext';
 
 interface NutrientProgress {
   current: number;
@@ -10,14 +11,18 @@ interface NutrientProgress {
 
 export default function ProgressSection() {
   const [date, setDate] = useState('сегодня');
+  const { getDailyCalories, getNutrientGoals } = useUser();
   
+  const goals = getNutrientGoals();
+  const dailyCalories = getDailyCalories();
+
   const nutrients: NutrientProgress[] = [
-    { current: 0, target: 100, color: 'from-blue-400 to-blue-600', name: 'Белки' },
-    { current: 0, target: 201, color: 'from-green-400 to-green-600', name: 'Углеводы' },
-    { current: 0, target: 44, color: 'from-orange-400 to-orange-600', name: 'Жиры' }
+    { current: 0, target: goals.proteins, color: 'from-blue-400 to-blue-600', name: 'Белки' },
+    { current: 0, target: goals.carbs, color: 'from-green-400 to-green-600', name: 'Углеводы' },
+    { current: 0, target: goals.fats, color: 'from-orange-400 to-orange-600', name: 'Жиры' }
   ];
 
-  const totalCalories = { current: 0, target: 1615 };
+  const totalCalories = { current: 0, target: dailyCalories };
   const caloriesPercentage = (totalCalories.current / totalCalories.target) * 100;
 
   return (
