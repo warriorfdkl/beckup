@@ -11,6 +11,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^4.17.0",
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs-converter": "^4.17.0",
+    "@tensorflow/tfjs-core": "^4.17.0",
     "@twa-dev/sdk": "^6.9.0",
     "@types/node": "20.11.30",
     "@types/react": "18.2.67",

@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { useState, useRef } from 'react';
 import WebApp from '@twa-dev/sdk';
+import { analyzeImage, formatAnalysisResults, FoodAnalysis } from '@/services/imageAnalysis';
+import { useUser } from '@/context/UserContext';
 
 interface TelegramWebApp {
   platform: string;
@@ -31,6 +33,7 @@ const telegram: TelegramWebApp = typeof window !== 'undefined' ? window.Telegram
 export default function CallToAction() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { getDailyCalories } = useUser();
 
   const handleThumbClick = () => {
     if (telegram.platform !== 'unknown') {
@@ -70,27 +73,35 @@ export default function CallToAction() {
     }
   };
 
+  const handleAnalysisResults = (results: FoodAnalysis[]) => {
+    const message = formatAnalysisResults(results);
+    const totalCalories = results.reduce((sum, item) => sum + item.calories, 0);
+    const dailyCalories = getDailyCalories();
+    const remainingCalories = dailyCalories - totalCalories;
+
+    telegram.showPopup({
+      title: 'Результат анализа',
+      message: `${message}\n\nОстаток дневной нормы: ${remainingCalories} ккал`,
+      buttons: [
+        {
+          id: "add",
+          type: "default",
+          text: "Добавить в дневник"
+        }
+      ]
+    }, () => {
+      // Здесь будет логика добавления в дневник
+    });
+  };
+
   const analyzePhoto = async (photoData: string) => {
     setIsAnalyzing(true);
     try {
-      // Здесь будет код для анализа фото с использованием TensorFlow.js
-      // и определения калорийности еды
-      // Пока что просто имитируем задержку
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      telegram.showPopup({
-        title: 'Результат анализа',
-        message: 'На фото обнаружено:\n- Куриная грудка (200 ккал)\n- Рис (150 ккал)\n- Овощи (50 ккал)',
-        buttons: [
-          {
-            id: "add",
-            type: "default",
-            text: "Добавить в дневник"
-          }
-        ]
-      }, () => {});
+      const results = await analyzeImage(photoData);
+      handleAnalysisResults(results);
     } catch (error) {
       telegram.showAlert('Произошла ошибка при анализе фото. Попробуйте еще раз.');
+      console.error('Error analyzing photo:', error);
     } finally {
       setIsAnalyzing(false);
     }
